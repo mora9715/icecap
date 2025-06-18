@@ -13,8 +13,12 @@ from .offsets import (
 class GameDriver:
     """The driver is responsible for direct interaction with the game."""
 
+    name_resolver: NameResolver
+
     def __init__(self, memory_manager: MemoryManager):
         self.memory_manager = memory_manager
+
+        self.name_resolver = NameResolver(memory_manager)
 
     def get_object_manager(self) -> ObjectManager:
         """Retrieves the Object Manager from the game client."""
@@ -23,10 +27,6 @@ class GameDriver:
             client_connection_address
         )
         return ObjectManager(self.memory_manager, object_manager_address)
-
-    def get_name_resolver(self) -> NameResolver:
-        """Name resolver can be initialized separately. Added for convenience."""
-        return NameResolver(self.memory_manager)
 
     def get_client_connection_address(self) -> int:
         address = self.memory_manager.read_uint(CLIENT_CONNECTION_OFFSET)

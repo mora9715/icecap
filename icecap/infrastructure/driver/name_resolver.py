@@ -1,5 +1,7 @@
 from icecap.infrastructure.memory_manager import MemoryManager
 from functools import lru_cache
+import csv
+import os
 from icecap.domain.models import Entity
 from icecap.domain.enums import EntityType
 
@@ -18,9 +20,47 @@ class NameResolver:
     The class resolves names for game entities.
     """
 
-    def __init__(self, memory_manager: MemoryManager):
+    __gameobject_template_csv_file__ = "gameobject_template.csv"
+
+    def __init__(
+        self,
+        memory_manager: MemoryManager,
+        data_mapping_directory: str = "data/mapping",
+    ):
         self.memory_manager = memory_manager
 
+        self.data_mapping_directory = data_mapping_directory
+
+        self._gameobject_name_cache = []
+
+    @lru_cache(maxsize=512)
+    def resolve_game_object_name_by_entry_id(self, entry_id: int) -> str:
+        """
+        Resolves the name of a game object by its entry ID.
+        """
+        self._warmup_gameobject_names()
+
+        for entry, name, _ in self._gameobject_name_cache:
+            if entry == entry_id:
+                return name
+
+        return "Unknown Game Object"
+
+    @lru_cache(maxsize=512)
+    def resolve_game_object_name_by_display_id(self, display_id: int) -> str:
+        """
+        Resolves the name of a game object by its display ID.
+        Does not guarantee uniqueness, as multiple game objects can share the same display ID.
+        """
+        self._warmup_gameobject_names()
+
+        for _, name, display in self._gameobject_name_cache:
+            if display_id == display:
+                return name
+
+        return "Unknown Game Object"
+
+    @lru_cache(maxsize=512)
     def resolve_name(self, entity: Entity) -> str:
         """
         Resolves the name of the entity based on its type.
@@ -29,6 +69,10 @@ class NameResolver:
             return self._resolve_unit_name(entity)
         elif entity.entity_type == EntityType.PLAYER:
             return self._resolve_player_name(entity)
+        elif entity.entity_type == EntityType.GAME_OBJECT:
+            raise ValueError(
+                "Use resolve_game_object_name_by_entry_id for game objects."
+            )
         raise NotImplementedError(
             f"Name resolution for {entity.entity_type} is not implemented."
         )
@@ -49,7 +93,6 @@ class NameResolver:
         except Exception:
             return "Unknown Unit"
 
-    @lru_cache(maxsize=128)
     def _resolve_player_name(self, entity: Entity, max_name_reads: int = 50) -> str:
         mask_address = NAME_STORE_BASE + NAME_MASK_OFFSET
         name_table_address = NAME_STORE_BASE + NAME_TABLE_ADDRESS_OFFSET
@@ -94,3 +137,31 @@ class NameResolver:
             checks += 1
 
         return "Unknown Player"
+
+    def _warmup_gameobject_names(self):
+        """
+        Pre-loads game object names to improve performance.
+        This method should be called at the start of the application.
+        """
+        if self._gameobject_name_cache:
+            return
+
+        try:
+            csv_path = os.path.join(
+                self.data_mapping_directory, self.__gameobject_template_csv_file__
+            )
+            with open(csv_path, "r") as file:
+                reader = csv.reader(file)
+                # Skip header row
+                next(reader)
+                for row in reader:
+                    if not row:
+                        continue
+
+                    entry_id = int(row[0].strip('"'))
+                    name = row[1].strip('"')
+                    display_id = int(row[3].strip('"'))
+
+                    self._gameobject_name_cache.append((entry_id, name, display_id))
+        except Exception:
+            return

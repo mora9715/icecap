@@ -6,4 +6,4 @@ class Position:
     x: float
     y: float
     z: float
-    yaw: float  # In radians
+    rotation: float  # In radians

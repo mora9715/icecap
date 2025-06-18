@@ -1,0 +1,56 @@
+site_name: Icecap Documentation
+theme:
+  name: material
+  features:
+  - navigation.footer
+  - navigation.instant.preview
+  - navigation.path
+  - navigation.sections
+  - navigation.tabs
+  - navigation.tabs.sticky
+  - navigation.top
+  - content.code.annotate
+  - content.code.copy
+  - content.tooltips
+  palette:
+    scheme: slate
+repo_url: https://github.com/mora9715/icecap
+plugins:
+- search
+- mkdocstrings:
+    handlers:
+      python:
+        inventories:
+        - https://docs.python.org/3/objects.inv
+        - https://installer.readthedocs.io/en/stable/objects.inv  # demonstration purpose in the docs
+        - https://mkdocstrings.github.io/autorefs/objects.inv
+        - https://www.mkdocs.org/objects.inv
+        - https://python-markdown.github.io/objects.inv
+        - https://jinja.palletsprojects.com/en/stable/objects.inv
+        - https://markupsafe.palletsprojects.com/en/stable/objects.inv
+        options:
+          docstring_options:
+            ignore_init_summary: true
+          docstring_section_style: list
+          filters: ["!^_"]
+          heading_level: 1
+          inherited_members: true
+          merge_init_into_class: true
+          parameter_headings: true
+          separate_signature: true
+          show_root_heading: true
+          show_root_full_path: false
+          show_signature_annotations: true
+          show_source: false
+          show_symbol_type_heading: true
+          show_symbol_type_toc: true
+          signature_crossrefs: true
+          summary: true
+
+
+nav:
+  - Calculation Docs: index.md
+  - tutorials.md
+  - How-To Guides: how-to-guides.md
+  - reference.md
+  - explanation.md
