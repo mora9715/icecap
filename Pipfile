@@ -4,11 +4,12 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-black = "*"
 
 [dev-packages]
 black = "*"
-ruff = "==0.11.13"
+ruff = "*"
+mypy = "*"
+types-psutil = "*"
 
 [requires]
-python_version = "3.13"
+python_version = ">=3.11"

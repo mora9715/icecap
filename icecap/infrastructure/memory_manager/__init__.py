@@ -5,6 +5,11 @@ from .linux import LinuxMemoryManager
 
 
 def get_memory_manager(pid: int) -> MemoryManager:
+    """Factory function to get the appropriate memory manager based on the OS.
+
+    Raises:
+        NotImplementedError: If the current OS is not supported
+    """
     if OS_SYSTEM == "Linux":
         return LinuxMemoryManager(pid)
 

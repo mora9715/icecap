@@ -1,10 +1,11 @@
-from typing import Self
 from enum import Enum
 
 from icecap.domain.enums.race import Race
 
 
 class Faction(Enum):
+    """Enumeration of factions in the game."""
+
     ALLIANCE = 0
     HORDE = 1
     OTHER = 2
@@ -35,8 +36,6 @@ class Faction(Enum):
     }
 
     @classmethod
-    def from_race(cls, race: Race) -> Self:
-        """
-        Returns the faction based on the race
-        """
-        return cls.__race_to_faction__[race]
+    def from_race(cls, race: Race) -> "Faction":
+        """Returns the faction based on the race."""
+        return cls.__race_to_faction__.get(race, cls.OTHER)  # type: ignore[return-value]

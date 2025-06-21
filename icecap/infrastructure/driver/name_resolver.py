@@ -1,3 +1,5 @@
+"""The name resolver."""
+
 from icecap.infrastructure.memory_manager import MemoryManager
 from functools import lru_cache
 import csv
@@ -16,8 +18,12 @@ from .offsets import (
 
 
 class NameResolver:
-    """
-    The class resolves names for game entities.
+    """Resolves names for game entities within the game.
+
+    This class provides methods to resolve names for different types of game entities
+    such as units, players, and game objects.
+
+    Game object names are loaded from a CSV file and cached for performance.
     """
 
     __gameobject_template_csv_file__ = "gameobject_template.csv"
@@ -28,15 +34,15 @@ class NameResolver:
         data_mapping_directory: str = "data/mapping",
     ):
         self.memory_manager = memory_manager
-
         self.data_mapping_directory = data_mapping_directory
-
-        self._gameobject_name_cache = []
+        self._gameobject_name_cache: list[tuple[int, str, int]] = []
 
     @lru_cache(maxsize=512)
     def resolve_game_object_name_by_entry_id(self, entry_id: int) -> str:
-        """
-        Resolves the name of a game object by its entry ID.
+        """Resolve the name of a game object by its entry ID.
+
+        This method uses the game object name cache to find the name associated with
+        the given entry ID.
         """
         self._warmup_gameobject_names()
 
@@ -48,9 +54,13 @@ class NameResolver:
 
     @lru_cache(maxsize=512)
     def resolve_game_object_name_by_display_id(self, display_id: int) -> str:
-        """
-        Resolves the name of a game object by its display ID.
-        Does not guarantee uniqueness, as multiple game objects can share the same display ID.
+        """Resolve the name of a game object by its display ID.
+
+        This method uses the game object name cache to find the name associated with
+        the given display ID.
+
+        Note that there is no uniqueness guarantee, as multiple game objects can share
+        the same display ID. The method returns the first matching name found.
         """
         self._warmup_gameobject_names()
 
@@ -62,20 +72,17 @@ class NameResolver:
 
     @lru_cache(maxsize=512)
     def resolve_name(self, entity: Entity) -> str:
-        """
-        Resolves the name of the entity based on its type.
+        """Resolve the name of an entity based on its type.
+
+        For game objects, use resolve_game_object_name_by_entry_id instead.
         """
         if entity.entity_type == EntityType.UNIT:
             return self._resolve_unit_name(entity)
         elif entity.entity_type == EntityType.PLAYER:
             return self._resolve_player_name(entity)
         elif entity.entity_type == EntityType.GAME_OBJECT:
-            raise ValueError(
-                "Use resolve_game_object_name_by_entry_id for game objects."
-            )
-        raise NotImplementedError(
-            f"Name resolution for {entity.entity_type} is not implemented."
-        )
+            raise ValueError("Use resolve_game_object_name_by_entry_id for game objects.")
+        raise NotImplementedError(f"Name resolution for {entity.entity_type} is not implemented.")
 
     def _resolve_unit_name(self, entity: Entity) -> str:
         try:
@@ -110,12 +117,8 @@ class NameResolver:
         index = mask & short_guid
         bucket_offset = 12 * index
 
-        current_node_address = self.memory_manager.read_uint(
-            name_base_address + bucket_offset + 8
-        )
-        next_node_offset = self.memory_manager.read_uint(
-            name_base_address + bucket_offset
-        )
+        current_node_address = self.memory_manager.read_uint(name_base_address + bucket_offset + 8)
+        next_node_offset = self.memory_manager.read_uint(name_base_address + bucket_offset)
 
         checks = 0
         while current_node_address != 0 and checks < max_name_reads:
@@ -139,10 +142,6 @@ class NameResolver:
         return "Unknown Player"
 
     def _warmup_gameobject_names(self):
-        """
-        Pre-loads game object names to improve performance.
-        This method should be called at the start of the application.
-        """
         if self._gameobject_name_cache:
             return
 

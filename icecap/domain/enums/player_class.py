@@ -2,6 +2,8 @@ from enum import Enum
 
 
 class PlayerClass(Enum):
+    """Enumeration of player classes in the game."""
+
     WARRIOR = 1
     PALADIN = 2
     HUNTER = 3

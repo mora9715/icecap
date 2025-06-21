@@ -2,6 +2,8 @@ from enum import Enum
 
 
 class Race(Enum):
+    """Enumeration of races in the game."""
+
     NEUTRAL = 0
     HUMAN = 1
     ORC = 2

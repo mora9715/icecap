@@ -1,24 +1,26 @@
 from dataclasses import dataclass
 from .entity import Entity
-
 from icecap.domain.dto import Position, UnitFields
 
 
 @dataclass(frozen=True)
 class Player(Entity):
-    """Player represents a player entity in the game."""
+    """Representation of a player in the game."""
 
     position: Position
+    """The position of the player in the world."""
+
     name: str
+    """The name of the player."""
 
     unit_fields: UnitFields
+    """Fields specific to the player."""
 
     def __str__(self) -> str:
         return (
             f"<{self.name}> [{self.unit_fields.race}"
             f" {self.unit_fields.player_class}] <Level {self.unit_fields.level}>\n"
             f"[HP: {self.unit_fields.hit_points}/{self.unit_fields.max_hit_points}]"
-            f" <Energy: {self.unit_fields.energy}/{self.unit_fields.max_energy}>\n"
             f"Position: <{self.position}>"
         )
 

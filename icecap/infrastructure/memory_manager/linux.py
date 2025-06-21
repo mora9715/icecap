@@ -1,4 +1,6 @@
 import struct
+from typing import Type
+from .interface import CStructTypeVar
 
 
 class LinuxMemoryManager:
@@ -30,8 +32,7 @@ class LinuxMemoryManager:
             data = mem_file.read(size)
             if len(data) < size:
                 raise IOError(
-                    f"Could only read {len(data)} bytes out of {size} at address"
-                    f" {address}"
+                    f"Could only read {len(data)} bytes out of {size} at address {address}"
                 )
             return data
         except (IOError, OSError) as e:
@@ -41,6 +42,11 @@ class LinuxMemoryManager:
         """Read a signed 2 bytes integer from the given address."""
         data = self.read_bytes(address, 2)
         return struct.unpack("<h", data)[0]
+
+    def read_ushort(self, address: int) -> int:
+        """Read a signed 2 bytes integer from the given address."""
+        data = self.read_bytes(address, 2)
+        return struct.unpack("<H", data)[0]
 
     def read_uint(self, address: int) -> int:
         """Read an unsigned 4 bytes integer from the given address."""
@@ -65,6 +71,12 @@ class LinuxMemoryManager:
         if null_pos != -1:
             data = data[:null_pos]
         return data.decode("utf-8", errors="replace")
+
+    def read_ctype_dataclass(self, address: int, dataclass: Type[CStructTypeVar]) -> CStructTypeVar:
+        length = dataclass.byte_size()
+
+        data = self.read_bytes(address, length)
+        return dataclass.from_bytes(data)
 
     def __del__(self):
         """Clean up resources when the object is garbage collected."""

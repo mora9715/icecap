@@ -2,6 +2,8 @@ from enum import Enum
 
 
 class EntityType(Enum):
+    """Enumeration of entity types in the game."""
+
     NONE = 0
     ITEM = 1
     CONTAINER = 2
