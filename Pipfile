@@ -10,6 +10,10 @@ black = "*"
 ruff = "*"
 mypy = "*"
 types-psutil = "*"
+mkdocstrings = {extras = ["python"], version = "*"}
+mkdocs = "*"
+mkdocs-material = "*"
+mkdocs-material-extensions = "*"
 
 [requires]
-python_version = ">=3.11"
+python_version = "3.13"

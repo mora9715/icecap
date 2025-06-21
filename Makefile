@@ -1,4 +1,4 @@
-.PHONY: lint lint-check format format-check docs
+.PHONY: lint lint-check format format-check serve-docs build-docs
 
 lint:
 	pipenv run ruff check --fix icecap
@@ -13,5 +13,8 @@ format:
 format-check:
 	pipenv run ruff format --check icecap
 
-docs:
+serve-docs:
 	pipenv run mkdocs serve
+
+build-docs:
+	pipenv run mkdocs build
