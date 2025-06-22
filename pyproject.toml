@@ -24,8 +24,8 @@ dynamic = ["version"]
 "Homepage" = "https://github.com/mora9715/icecap"
 "Bug Tracker" = "https://github.com/mora9715/icecap/issues"
 
-[tool.setuptools]
-packages = ["icecap"]
+[tool.setuptools.packages.find]
+include = ["icecap*"]
 
 [tool.setuptools.dynamic]
 version = {attr = "icecap.__version__"}
