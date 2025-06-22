@@ -10,6 +10,10 @@ The library is specifically designed for **WoW 3.3.5a (build 1340)** and will no
 - **Entities as Objects**: Interact with game entities (players, units, game objects) as Python objects
 - **Less Boilerplate**: Designed to minimize boilerplate code
 
+## Documentation
+
+For detailed documentation, please refer to [IceCap Documentation](https://icecap.prodan.cloud) 
+
 
 ## Disclaimer
 
