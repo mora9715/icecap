@@ -20,7 +20,7 @@ class CTypeMixin(CTypeDataclass):
     @classmethod
     def _ensure_ctypes(cls) -> None:
         """Build and cache the ctypes.Structure that mirrors the dataclass."""
-        if cls._ctypes_cls is not None:
+        if getattr(cls, "_ctypes_cls", None) is not None:
             return
 
         if not is_dataclass(cls):

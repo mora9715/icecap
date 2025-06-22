@@ -1,17 +1,18 @@
-from icecap.constants import OS_SYSTEM
-
-from .linux import find_linux_wow_process_id
+from icecap.constants import WOW_PROCESS_NAME
+import psutil
 
 
 def get_wow_process_id() -> int:
     """Factory function to get the game process ID based on the OS.
 
     Raises:
-        NotImplementedError: If the current OS is not supported
+        ValueError: If the process is not found.
     """
-    if OS_SYSTEM == "Linux":
-        return find_linux_wow_process_id()
-    raise NotImplementedError(f"Process ID retrieval for {OS_SYSTEM} is not implemented.")
+    for proc in psutil.process_iter(["pid", "name"]):
+        if proc.info["name"] == WOW_PROCESS_NAME:
+            return int(proc.info["pid"])
+
+    raise ValueError("WoW process not found.")
 
 
 __all__ = [
