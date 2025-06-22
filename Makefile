@@ -1,4 +1,4 @@
-.PHONY: lint lint-check format format-check serve-docs build-docs
+.PHONY: lint lint-check format format-check serve-docs build-docs build
 
 lint:
 	pipenv run ruff check --fix icecap
@@ -18,3 +18,6 @@ serve-docs:
 
 build-docs:
 	pipenv run mkdocs build
+
+build:
+	pipenv run python -m build

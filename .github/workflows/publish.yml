@@ -1,16 +1,21 @@
-name: CI
+name: Publish to PyPI
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    tags:
+      - 'v*'
 
 jobs:
-  code-quality:
+  deploy:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -25,8 +30,8 @@ jobs:
       - name: Install dependencies
         run: pipenv install --dev
 
-      - name: Run format
-        run: make format-check
+      - name: Build package
+        run: make build
 
-      - name: Run lint
-        run: make lint-check
+      - name: Publish package to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

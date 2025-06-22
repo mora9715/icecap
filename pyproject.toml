@@ -1,3 +1,35 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "icecap"
+description = "A Python library for building World of Warcraft assistant applications"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Eugene Prodan", email = "mora9715@gmail.com"}
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Development Status :: 3 - Alpha",
+]
+dependencies = []
+dynamic = ["version"]
+
+[project.urls]
+"Homepage" = "https://github.com/mora9715/icecap"
+"Bug Tracker" = "https://github.com/mora9715/icecap/issues"
+
+[tool.setuptools]
+packages = ["icecap"]
+
+[tool.setuptools.dynamic]
+version = {attr = "icecap.__version__"}
+
 [tool.ruff]
 # Enable pycodestyle (`E`) and Pyflakes (`F`) codes by default.
 lint.select = ["E", "F"]

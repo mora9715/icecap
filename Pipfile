@@ -14,6 +14,8 @@ mkdocstrings = {extras = ["python"], version = "*"}
 mkdocs = "*"
 mkdocs-material = "*"
 mkdocs-material-extensions = "*"
+setuptools = "*"
+build = "*"
 
 [requires]
 python_version = "3.13"
