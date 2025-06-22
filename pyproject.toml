@@ -17,7 +17,7 @@ classifiers = [
     "Operating System :: OS Independent",
     "Development Status :: 3 - Alpha",
 ]
-dependencies = []
+dependencies = ["psutil", "pymem; platform_system == 'Windows'"]
 dynamic = ["version"]
 
 [project.urls]
