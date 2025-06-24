@@ -2,12 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.2] - 2025-06-24
+
+### Bug Fixes
+
+- Get correct position offset for game objects
+- Add game object name mapping file to the library as a resource
+
 ## [0.2.1] - 2025-06-22
 
 ### Bug Fixes
 
 - Correctly discover package submodules via setuptools
-
 
 ## [0.2.0] - 2025-06-22
 
