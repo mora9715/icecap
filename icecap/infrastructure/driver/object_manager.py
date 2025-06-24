@@ -16,7 +16,8 @@ from .offsets import (
     OBJECT_GUID_OFFSET,
     NEXT_OBJECT_OFFSET,
     LOCAL_PLAYER_GUID_OFFSET,
-    OBJECT_X_POSITION_OFFSET,
+    UNIT_X_POSITION_OFFSET,
+    GAME_OBJECT_X_POSITION_OFFSET,
     OBJECT_FIELDS_OFFSET,
 )
 
@@ -91,8 +92,14 @@ class ObjectManager:
         This method reads the entity's position data from memory and returns it
         as an ObjectPosition object containing x, y, z coordinates and rotation.
         """
+        position_offset = (
+            GAME_OBJECT_X_POSITION_OFFSET
+            if entity.entity_type == EntityType.GAME_OBJECT
+            else UNIT_X_POSITION_OFFSET
+        )
+
         object_position = self.memory_manager.read_ctype_dataclass(
-            entity.object_address + OBJECT_X_POSITION_OFFSET, ObjectPosition
+            entity.object_address + position_offset, ObjectPosition
         )
 
         return object_position
