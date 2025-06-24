@@ -1,12 +1,13 @@
 """The name resolver."""
 
+from pathlib import Path
 from icecap.infrastructure.memory_manager import MemoryManager
+from importlib.abc import Traversable
 from functools import lru_cache
 import csv
-import os
 from icecap.domain.models import Entity
 from icecap.domain.enums import EntityType
-
+import importlib.resources
 from .offsets import (
     UNIT_NAMEBLOCK_OFFSET,
     UNIT_NAMEBLOCK_NAME_OFFSET,
@@ -31,10 +32,17 @@ class NameResolver:
     def __init__(
         self,
         memory_manager: MemoryManager,
-        data_mapping_directory: str = "data/mapping",
+        data_mapping_filename: str | None = None,
     ):
         self.memory_manager = memory_manager
-        self.data_mapping_directory = data_mapping_directory
+
+        if data_mapping_filename:
+            self.data_mapping_file: Path | Traversable = Path(data_mapping_filename)
+        else:
+            self.data_mapping_file = importlib.resources.files("icecap.data.mapping").joinpath(
+                "gameobject_template.csv"
+            )
+
         self._gameobject_name_cache: list[tuple[int, str, int]] = []
 
     @lru_cache(maxsize=512)
@@ -146,10 +154,7 @@ class NameResolver:
             return
 
         try:
-            csv_path = os.path.join(
-                self.data_mapping_directory, self.__gameobject_template_csv_file__
-            )
-            with open(csv_path, "r") as file:
+            with self.data_mapping_file.open("r") as file:
                 reader = csv.reader(file)
                 # Skip header row
                 next(reader)
