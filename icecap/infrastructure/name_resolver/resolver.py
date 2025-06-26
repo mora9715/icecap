@@ -1,4 +1,4 @@
-"""The name resolver."""
+"""The name resolver implementation."""
 
 from pathlib import Path
 from icecap.infrastructure.memory_manager import MemoryManager
@@ -18,15 +18,7 @@ from .offsets import (
 )
 
 
-class NameResolver:
-    """Resolves names for game entities within the game.
-
-    This class provides methods to resolve names for different types of game entities
-    such as units, players, and game objects.
-
-    Game object names are loaded from a CSV file and cached for performance.
-    """
-
+class ConcreteNameResolver:
     __gameobject_template_csv_file__ = "gameobject_template.csv"
 
     def __init__(
@@ -35,6 +27,8 @@ class NameResolver:
         data_mapping_filename: str | None = None,
     ):
         self.memory_manager = memory_manager
+
+        self.data_mapping_filename = data_mapping_filename
 
         if data_mapping_filename:
             self.data_mapping_file: Path | Traversable = Path(data_mapping_filename)
@@ -47,11 +41,6 @@ class NameResolver:
 
     @lru_cache(maxsize=512)
     def resolve_game_object_name_by_entry_id(self, entry_id: int) -> str:
-        """Resolve the name of a game object by its entry ID.
-
-        This method uses the game object name cache to find the name associated with
-        the given entry ID.
-        """
         self._warmup_gameobject_names()
 
         for entry, name, _ in self._gameobject_name_cache:
@@ -62,14 +51,6 @@ class NameResolver:
 
     @lru_cache(maxsize=512)
     def resolve_game_object_name_by_display_id(self, display_id: int) -> str:
-        """Resolve the name of a game object by its display ID.
-
-        This method uses the game object name cache to find the name associated with
-        the given display ID.
-
-        Note that there is no uniqueness guarantee, as multiple game objects can share
-        the same display ID. The method returns the first matching name found.
-        """
         self._warmup_gameobject_names()
 
         for _, name, display in self._gameobject_name_cache:
@@ -80,10 +61,6 @@ class NameResolver:
 
     @lru_cache(maxsize=512)
     def resolve_name(self, entity: Entity) -> str:
-        """Resolve the name of an entity based on its type.
-
-        For game objects, use resolve_game_object_name_by_entry_id instead.
-        """
         if entity.entity_type == EntityType.UNIT:
             return self._resolve_unit_name(entity)
         elif entity.entity_type == EntityType.PLAYER:

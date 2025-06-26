@@ -71,6 +71,7 @@ nav:
      - Infrastructure:
         - Driver: api/infrastructure/driver.md
         - Memory Manager: api/infrastructure/memory_manager.md
+        - Name Resolver: api/infrastructure/name_resolver.md
         - Process: api/infrastructure/process.md
         - Repository: api/infrastructure/repository.md
      - Domain:

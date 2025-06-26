@@ -3,6 +3,8 @@ from icecap.infrastructure.driver import GameDriver
 from icecap.domain.models import GameObject, Entity
 from icecap.domain.enums import EntityType
 from icecap.domain.dto import Position, GameObjectFields
+from icecap.infrastructure.driver import ObjectManager
+from icecap.infrastructure.name_resolver import NameResolver
 
 
 class GameObjectRepository:
@@ -13,19 +15,26 @@ class GameObjectRepository:
 
     def __init__(self, driver: GameDriver):
         self.driver = driver
-        self.object_manager = self.driver.get_object_manager()
 
-    def get_game_object_from_entity(self, entity: Entity) -> GameObject:
+    def get_game_object_from_entity(
+        self,
+        entity: Entity,
+        object_manager: ObjectManager | None = None,
+        name_resolver: NameResolver | None = None,
+    ) -> GameObject:
         """Extends an Entity object to a GameObject instance.
 
         This method takes an Entity object, extracts all the necessary information
         and creates a GameObject object from it.
+
+        You can bring your own name resolver and object manager.
         """
-        position = self.object_manager.get_entity_position(entity)
-        game_object_fields = self.object_manager.get_game_object_fields(entity)
-        name = self.driver.name_resolver.resolve_game_object_name_by_entry_id(
-            game_object_fields.entry
-        )
+        object_manager = object_manager or self.driver.object_manager
+        name_resolver = name_resolver or self.driver.name_resolver
+
+        position = object_manager.get_entity_position(entity)
+        game_object_fields = object_manager.get_game_object_fields(entity)
+        name = name_resolver.resolve_game_object_name_by_entry_id(game_object_fields.entry)
 
         game_object = GameObject(
             guid=entity.guid,
@@ -49,11 +58,14 @@ class GameObjectRepository:
         only those that are of type GAME_OBJECT. Each entity is extended to a
         GameObject object before being yielded.
         """
-        for entity in self.object_manager.yield_objects():
+        object_manager = self.driver.object_manager
+        name_resolver = self.driver.name_resolver
+
+        for entity in object_manager.yield_objects():
             if entity.entity_type != EntityType.GAME_OBJECT:
                 continue
 
-            yield self.get_game_object_from_entity(entity)
+            yield self.get_game_object_from_entity(entity, object_manager, name_resolver)
 
     def refresh_game_object(self, game_object: GameObject) -> GameObject:
         """Refresh the game object data with the latest information from the game.
@@ -62,7 +74,7 @@ class GameObjectRepository:
         returns a new GameObject instance with the updated data. The original GameObject
         instance is not modified.
         """
-        object_manager = self.driver.get_object_manager()
+        object_manager = self.driver.object_manager
 
         position = object_manager.get_entity_position(game_object)
         game_object_fields = object_manager.get_game_object_fields(game_object)

@@ -35,11 +35,11 @@ class ObjectManager:
     def __init__(
         self,
         memory_manager: MemoryManager,
-        object_manager_address: int,
+        address: int,
         max_objects: int = 1000,
     ):
         self.memory_manager = memory_manager
-        self.object_manager_address = object_manager_address
+        self.address = address
         self.max_objects = max_objects
 
     def get_local_player_guid(self) -> int:
@@ -48,9 +48,7 @@ class ObjectManager:
         This method uses a dynamic address that should be more reliable than static offsets.
         It reads the local player GUID directly from the object manager.
         """
-        return self.memory_manager.read_ulonglong(
-            self.object_manager_address + LOCAL_PLAYER_GUID_OFFSET
-        )
+        return self.memory_manager.read_ulonglong(self.address + LOCAL_PLAYER_GUID_OFFSET)
 
     def yield_objects(self) -> Generator[Entity, None, None]:
         """Yield all objects in the Object Manager.
@@ -59,9 +57,7 @@ class ObjectManager:
         and yields each one as an Entity object.
         """
         checked_objects = 0
-        current_object_address = self.memory_manager.read_uint(
-            self.object_manager_address + FIRST_OBJECT_OFFSET
-        )
+        current_object_address = self.memory_manager.read_uint(self.address + FIRST_OBJECT_OFFSET)
 
         while checked_objects < self.max_objects:
             try:

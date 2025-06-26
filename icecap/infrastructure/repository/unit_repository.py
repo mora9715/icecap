@@ -3,6 +3,8 @@ from icecap.infrastructure.driver import GameDriver
 from icecap.domain.models import Unit, Entity
 from icecap.domain.enums import EntityType, Faction, Race, PlayerClass, Gender
 from icecap.domain.dto import Position, UnitFields
+from icecap.infrastructure.driver import ObjectManager
+from icecap.infrastructure.name_resolver import NameResolver
 
 
 class UnitRepository:
@@ -13,18 +15,25 @@ class UnitRepository:
 
     def __init__(self, driver: GameDriver):
         self.driver = driver
-        self.object_manager = self.driver.get_object_manager()
 
-    def get_unit_from_entity(self, entity: Entity) -> Unit:
+    def get_unit_from_entity(
+        self,
+        entity: Entity,
+        object_manager: ObjectManager | None = None,
+        name_resolver: NameResolver | None = None,
+    ) -> Unit:
         """Extend an Entity object to a Unit object.
 
         This method takes an Entity object and extracts all the necessary information
         and creates a Unit object from it.
         """
-        position = self.object_manager.get_entity_position(entity)
-        name = self.driver.name_resolver.resolve_name(entity)
+        object_manager = object_manager or self.driver.object_manager
+        name_resolver = name_resolver or self.driver.name_resolver
 
-        unit_fields = self.object_manager.get_unit_fields(entity)
+        position = object_manager.get_entity_position(entity)
+        name = name_resolver.resolve_name(entity)
+
+        unit_fields = object_manager.get_unit_fields(entity)
         race = Race(unit_fields.bytes_0_race)
 
         unit = Unit(
@@ -52,11 +61,14 @@ class UnitRepository:
         only those that are of type UNIT. Each entity is extended to a Unit object
         before being yielded.
         """
-        for entity in self.object_manager.yield_objects():
+        object_manager = self.driver.object_manager
+        name_resolver = self.driver.name_resolver
+
+        for entity in object_manager.yield_objects():
             if entity.entity_type != EntityType.UNIT:
                 continue
 
-            yield self.get_unit_from_entity(entity)
+            yield self.get_unit_from_entity(entity, object_manager, name_resolver)
 
     def refresh_unit(self, unit: Unit) -> Unit:
         """Refresh the unit data with the latest information from the game.
@@ -65,7 +77,7 @@ class UnitRepository:
         returns a new Unit instance with the updated data. The original Unit
         instance is not modified.
         """
-        object_manager = self.driver.get_object_manager()
+        object_manager = self.driver.object_manager
 
         position = object_manager.get_entity_position(unit)
         unit_fields = object_manager.get_unit_fields(unit)

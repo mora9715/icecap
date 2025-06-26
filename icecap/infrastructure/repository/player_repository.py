@@ -3,6 +3,8 @@ from icecap.infrastructure.driver import GameDriver
 from icecap.domain.models import Player, Entity
 from icecap.domain.enums import EntityType, Faction, Race, PlayerClass, Gender
 from icecap.domain.dto import Position, UnitFields
+from icecap.infrastructure.driver import ObjectManager
+from icecap.infrastructure.name_resolver import NameResolver
 
 
 class PlayerRepository:
@@ -13,18 +15,25 @@ class PlayerRepository:
 
     def __init__(self, driver: GameDriver):
         self.driver = driver
-        self.object_manager = self.driver.get_object_manager()
 
-    def get_player_from_entity(self, entity: Entity) -> Player:
+    def get_player_from_entity(
+        self,
+        entity: Entity,
+        object_manager: ObjectManager | None = None,
+        name_resolver: NameResolver | None = None,
+    ) -> Player:
         """Extend an Entity object to a Player object.
 
         This method takes an Entity object and extracts all the necessary information
         to create a Player object.
         """
-        position = self.object_manager.get_entity_position(entity)
-        name = self.driver.name_resolver.resolve_name(entity)
+        object_manager = object_manager or self.driver.object_manager
+        name_resolver = name_resolver or self.driver.name_resolver
 
-        unit_fields = self.object_manager.get_unit_fields(entity)
+        position = object_manager.get_entity_position(entity)
+        name = name_resolver.resolve_name(entity)
+
+        unit_fields = object_manager.get_unit_fields(entity)
         race = Race(unit_fields.bytes_0_race)
 
         player = Player(
@@ -52,11 +61,14 @@ class PlayerRepository:
         only those that are of type PLAYER. Each entity is extended to a Player object
         before being yielded.
         """
-        for entity in self.object_manager.yield_objects():
+        object_manager = self.driver.object_manager
+        name_resolver = self.driver.name_resolver
+
+        for entity in object_manager.yield_objects():
             if entity.entity_type != EntityType.PLAYER:
                 continue
 
-            yield self.get_player_from_entity(entity)
+            yield self.get_player_from_entity(entity, object_manager, name_resolver)
 
     def refresh_player(self, player: Player) -> Player:
         """Refresh the player data with the latest information from the game.
@@ -65,7 +77,7 @@ class PlayerRepository:
         returns a new Player instance with the updated data. The original Player
         instance is not modified.
         """
-        object_manager = self.driver.get_object_manager()
+        object_manager = self.driver.object_manager
 
         position = object_manager.get_entity_position(player)
         unit_fields = object_manager.get_unit_fields(player)
@@ -93,10 +105,13 @@ class PlayerRepository:
         It uses the object manager to get the local player's
         GUID and then searches for the corresponding entity.
         """
-        local_player_guid = self.object_manager.get_local_player_guid()
+        object_manager = self.driver.object_manager
+        name_resolver = self.driver.name_resolver
 
-        for entity in self.object_manager.yield_objects():
+        local_player_guid = object_manager.get_local_player_guid()
+
+        for entity in object_manager.yield_objects():
             if entity.guid == local_player_guid:
-                return self.get_player_from_entity(entity)
+                return self.get_player_from_entity(entity, object_manager, name_resolver)
 
         raise ValueError("Local player not found in the object manager.")

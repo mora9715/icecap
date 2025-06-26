@@ -16,3 +16,7 @@ class Position:
 
     rotation: float
     """The rotation angle in radians (0-2pi)."""
+
+    def get_distance_to(self, other: "Position") -> float:
+        """Calculates the distance to another position."""
+        return ((self.x - other.x) ** 2 + (self.y - other.y) ** 2 + (self.z - other.z) ** 2) ** 0.5
