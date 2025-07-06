@@ -17,6 +17,6 @@ The library provides a memory management system that allows you to read and writ
 This enables you to access game data and manipulate it as needed.
 - ## **Entities as objects**
 The library allows you to interact with game entities as Python objects, making it easier to work with them in your code.
-- ## **Less boilerplate**
-The library is designed to minimize boilerplate code, allowing you to focus on building your application without unnecessary complexity.
+- ## **Client assets management**
+Access MPQ archives programmatically to load and use assets such as textures, maps, and models.
 </div>
