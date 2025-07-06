@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - 2025-07-06
+
+### Features
+
+- Add an ability to get the current map ID using the object manager
+- Add an ability to work with MPQ archives
+
 ## [0.3.0] - 2025-06-26
 
 ### Features

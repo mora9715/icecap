@@ -19,6 +19,7 @@ from .offsets import (
     UNIT_X_POSITION_OFFSET,
     GAME_OBJECT_X_POSITION_OFFSET,
     OBJECT_FIELDS_OFFSET,
+    MAP_ID_OFFSET,
 )
 
 
@@ -127,3 +128,12 @@ class ObjectManager:
         )
 
         return game_object_fields
+
+    def get_map_id(self) -> int:
+        """Retrieve the map ID from the object manager.
+
+        It can be used to identify the current map and get extra information
+        from the map database.
+        """
+
+        return self.memory_manager.read_uint(self.address + MAP_ID_OFFSET)
