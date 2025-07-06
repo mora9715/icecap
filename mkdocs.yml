@@ -65,7 +65,10 @@ plugins:
 nav:
   - Icecap Documentation: index.md
   - Getting Started: getting_started.md
-  - Tutorials: tutorials.md
+  - Tutorials:
+      - Index: tutorials/index.md
+      - Assets:
+          - Work with MPQ files:  tutorials/assets/work_with_mpq.md
   - API Reference:
      - API Overview: api/index.md
      - Infrastructure:
@@ -74,6 +77,7 @@ nav:
         - Name Resolver: api/infrastructure/name_resolver.md
         - Process: api/infrastructure/process.md
         - Repository: api/infrastructure/repository.md
+        - Resource: api/infrastructure/resource.md
      - Domain:
         - Models: api/domain/models.md
         - DTO: api/domain/dto.md
