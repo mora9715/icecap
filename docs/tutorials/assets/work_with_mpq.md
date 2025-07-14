@@ -119,19 +119,19 @@ hash_entry = archive.get_hash_table_entry(filename)
 if hash_entry:
     # Get the corresponding block table entry
     block_entry = archive.get_block_table().entries[hash_entry.block_index]
-    
+
     # Check file flags
     print(f"File exists: {bool(block_entry.flags & MPQ_FILE_EXISTS)}")
     print(f"File is encrypted: {bool(block_entry.flags & MPQ_FILE_ENCRYPTED)}")
     print(f"File is compressed: {bool(block_entry.flags & MPQ_FILE_COMPRESS)}")
     print(f"File is a single unit: {bool(block_entry.flags & MPQ_FILE_SINGLE_UNIT)}")
-    
+
     # Print file sizes
     print(f"Compressed size: {block_entry.compressed_size} bytes")
     print(f"Uncompressed size: {block_entry.uncompressed_size} bytes")
 ```
 
-## Complete Example
+### Complete Example
 
 Here's a complete example that demonstrates how to open an MPQ archive, list its contents, and read a specific file:
 
@@ -154,25 +154,140 @@ print(f"Found {len(texture_files)} texture files.")
 if texture_files:
     filename = texture_files[0]
     file_data = archive.read_file(filename)
-    
+
     if file_data:
         print(f"Successfully read '{filename}' ({len(file_data)} bytes)")
-        
+
         # Calculate hash values for the filename
         hash_a = archive.crypt.hash(filename, HashType.HASH_A)
         hash_b = archive.crypt.hash(filename, HashType.HASH_B)
-        
+
         print(f"Filename: {filename}")
         print(f"Hash A: {hex(hash_a)}")
         print(f"Hash B: {hex(hash_b)}")
 ```
 
+## Working with Archive Chains
+
+World of Warcraft uses multiple MPQ archives to store game data. These archives are loaded in a specific priority order, allowing newer content to override older content without replacing entire archives. This system is known as an "archive chain."
+
+### Understanding Archive Chains
+
+In WoW, when the game needs to read a file, it checks multiple archives in order of priority:
+
+1. Patch archives (highest priority)
+2. Expansion-specific archives
+3. Base game archives
+4. Common archives (lowest priority)
+
+This allows game updates to modify only specific files while leaving the rest untouched. The `MPQArchiveChain` class in Icecap implements this same behavior.
+
+### Creating an Archive Chain
+
+To work with multiple archives in a priority order, use the `MPQArchiveChain` class:
+
+```python
+from icecap.infrastructure.resource.mpq import MPQArchiveChain
+
+# Create an archive chain with default WoW priorities
+chain = MPQArchiveChain()
+```
+
+### Adding Archives to the Chain
+
+You can add multiple archives to the chain. The chain will automatically determine the priority based on the archive name:
+
+```python
+from icecap.infrastructure.resource.mpq import MPQArchive, MPQArchiveChain
+
+# Create an archive chain
+chain = MPQArchiveChain()
+
+# Add archives to the chain
+base_archive = MPQArchive("path/to/base.mpq")
+patch_archive = MPQArchive("path/to/patch.mpq")
+
+chain.add_archive(base_archive)
+chain.add_archive(patch_archive)
+```
+
+### Reading Files from the Chain
+
+When reading a file from the chain, it will check each archive in order of priority until it finds the file:
+
+```python
+# Read a file from the chain
+filename = "Textures/Minimap/md5translate.trs"
+file_data = chain.read_file(filename)
+
+if file_data:
+    print(f"Successfully read '{filename}' from the archive chain")
+```
+
+### Understanding WoW Archive Priorities
+
+The default priority system used by `MPQArchiveChain` matches the one used by World of Warcraft:
+
+```python
+WOW_ARCHIVE_PRIORITIES = (
+    r"patch-([a-z]+)-(\d+)",  # Highest priority (e.g., patch-enUS-3)
+    r"patch-(\d+)",           # (e.g., patch-2)
+    "patch",                  # (e.g., patch.mpq)
+    r"lichking-([a-z]+)",     # (e.g., lichking-enUS)
+    r"lichking",              # (e.g., lichking.mpq)
+    r"expansion-([-a-z]+)",   # (e.g., expansion-enUS)
+    "expansion",              # (e.g., expansion.mpq)
+    r"base-([a-z]+)",         # (e.g., base-enUS)
+    "base",                   # (e.g., base.mpq)
+    r"locale-([a-z]+)",       # (e.g., locale-enUS)
+    r"common-(\d+)",          # (e.g., common-2)
+    "common",                 # (e.g., common.mpq)
+    ".*",                     # Lowest priority (any other archives)
+)
+```
+
+Archives are matched against these patterns in order, and the first match determines the archive's priority.
+
+### Complete Chain Example
+
+Here's a complete example that demonstrates how to use an archive chain to read files from multiple archives:
+
+```python
+from icecap.infrastructure.resource.mpq import MPQArchive, MPQArchiveChain
+
+# Create an archive chain
+chain = MPQArchiveChain()
+
+# Add multiple archives to the chain
+base_archive = MPQArchive("path/to/base.mpq")
+expansion_archive = MPQArchive("path/to/expansion.mpq")
+patch_archive = MPQArchive("path/to/patch.mpq")
+
+# Add archives to the chain (order doesn't matter as priority is determined by name)
+chain.add_archive(base_archive)
+chain.add_archive(expansion_archive)
+chain.add_archive(patch_archive)
+
+# Read a file that might exist in multiple archives
+filename = "Textures/Minimap/md5translate.trs"
+file_data = chain.read_file(filename)
+
+if file_data:
+    print(f"Successfully read '{filename}' from the archive chain")
+    print(f"File size: {len(file_data)} bytes")
+
+    # The chain automatically used the highest priority archive that contains the file
+    # In this case, if the file exists in patch.mpq, it will be read from there
+    # even if it also exists in base.mpq or expansion.mpq
+```
+
 ## Next Steps
 
-Now that you understand how to work with MPQ archives, you can:
+Now that you understand how to work with MPQ archives and archive chains, you can:
 
 - Extract game resources for analysis
 - Create tools to browse and extract MPQ contents
 - Analyze game data for research purposes
+- Work with multiple archives in the same way WoW does
 
 For more information about the MPQ format, check out the [WoWDev Wiki](https://wowdev.wiki/MPQ).

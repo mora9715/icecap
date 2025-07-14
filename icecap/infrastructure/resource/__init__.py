@@ -7,6 +7,8 @@ Currently, the module provides tools to load MPQ archives, list and extract indi
 files from the archives.
 """
 
-from .mpq import MPQArchive
+from .mpq import MPQArchive, MPQArchiveChain
+from .dbc import DBCFile, MapRowWithDefinitions
 
-__all__ = ["MPQArchive"]
+
+__all__ = ["MPQArchive", "MPQArchiveChain", "DBCFile", "MapRowWithDefinitions"]

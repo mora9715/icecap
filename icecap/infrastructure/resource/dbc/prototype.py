@@ -1,0 +1,2 @@
+class BaseDBCRecord:
+    pass

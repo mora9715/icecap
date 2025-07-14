@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0] - 2025-07-14
+
+### Features
+
+- Add an ability to work with DBC database files
+- Add an ability to work with MPQ archive chains — just as the game does
+
 ## [0.4.0] - 2025-07-06
 
 ### Features

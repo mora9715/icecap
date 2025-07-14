@@ -191,7 +191,7 @@ class MPQArchive:
 
         return file_data
 
-    def read_file(self, filename) -> bytes | None:
+    def read_file(self, filename: str) -> bytes | None:
         """
         Read a file from the MPQ archive.
         """

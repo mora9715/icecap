@@ -68,7 +68,8 @@ nav:
   - Tutorials:
       - Index: tutorials/index.md
       - Assets:
-          - Work with MPQ files:  tutorials/assets/work_with_mpq.md
+          - Work with MPQ files: tutorials/assets/work_with_mpq.md
+          - Work with DBC files: tutorials/assets/work_with_dbc.md
   - API Reference:
      - API Overview: api/index.md
      - Infrastructure:
