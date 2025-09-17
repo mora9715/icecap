@@ -33,6 +33,24 @@ class MPQArchiveChain:
             re.compile(pattern) for pattern in archive_priorities
         ]
 
+    @classmethod
+    def load_archives(cls, game_data_path: str) -> "MPQArchiveChain":
+        """Find all MPQ archives in the game_data_path and add them to an MPQArchiveChain."""
+        chain = MPQArchiveChain()
+
+        for root, _, files in os.walk(game_data_path):
+            for file in files:
+                if file.lower().endswith(MPQArchive.ARCHIVE_EXTENSION):
+                    try:
+                        archive_path = os.path.join(root, file)
+                        archive = MPQArchive(archive_path)
+
+                        chain.add_archive(archive)
+                    except Exception as e:
+                        raise ValueError(f"Failed to load MPQ archive {file}: {e}") from e
+
+        return chain
+
     def add_archive(self, archive: MPQArchive):
         """Add an archive to the chain."""
         archive_name = os.path.split(archive.file_path)[-1].lower().rstrip(".mpq")

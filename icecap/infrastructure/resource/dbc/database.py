@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, IO
 
 import struct
 
@@ -10,8 +10,11 @@ class DBCFile:
     HEADER_SIGNATURE = "WDBC"
     HEADER_SIZE = 20
 
-    def __init__(self, path: str, row_prototype: Type[DBCRowWithDefinitions]):
-        self.path = path
+    def __init__(
+        self,
+        file_path: str | IO,
+        row_prototype: Type[DBCRowWithDefinitions],
+    ):
         self.row_prototype = row_prototype
 
         self._header: DBCHeader | None = None
@@ -22,7 +25,14 @@ class DBCFile:
             or DBCColumnDefinition.generate_default_definitions(self.get_header().field_count)
         )
 
-        self.file = open(path, "rb")
+        if isinstance(file_path, str):
+            self.file = open(file_path, "rb")
+        else:
+            self.file = file_path
+
+    @classmethod
+    def from_file(cls, file_path: str, row_prototype: Type[DBCRowWithDefinitions]):
+        return cls(file_path=file_path, row_prototype=row_prototype)
 
     def get_header(self) -> DBCHeader:
         if self._header:

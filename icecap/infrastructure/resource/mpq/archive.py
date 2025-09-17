@@ -25,6 +25,8 @@ class MPQArchive:
     The implementation is very naive and most likely won't work with post-WOTLK expansions.
     """
 
+    ARCHIVE_EXTENSION = ".mpq"
+
     def __init__(self, path: str):
         self.file_path = path
 
@@ -35,6 +37,9 @@ class MPQArchive:
         self._hash_table: HashTable | None = None
         self._block_table: BlockTable | None = None
         self._file_names: list[str] | None = None
+
+    def __str__(self) -> str:
+        return f"<MPQArchive {self.file_path}>"
 
     def get_file_names(self) -> list[str]:
         """Get a list of file names in the archive.

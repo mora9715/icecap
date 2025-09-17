@@ -70,6 +70,8 @@ nav:
       - Assets:
           - Work with MPQ files: tutorials/assets/work_with_mpq.md
           - Work with DBC files: tutorials/assets/work_with_dbc.md
+      - Navigation:
+          - Work with Minimap: tutorials/navigation/work_with_minimap.md
   - API Reference:
      - API Overview: api/index.md
      - Infrastructure:
@@ -83,7 +85,10 @@ nav:
         - Models: api/domain/models.md
         - DTO: api/domain/dto.md
         - Enums: api/domain/enums.md
-     - Services: api/services.md
+     - Services: 
+        - Overview: api/services.md
+        - Navigation:
+           - Minimap: api/services/navigation/minimap.md
 
 markdown_extensions:
   - attr_list
