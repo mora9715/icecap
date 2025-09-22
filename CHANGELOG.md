@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0] - 2025-09-22
+
+### Features
+
+- Add an ability to work with minimaps and render images
+
 ## [0.5.0] - 2025-07-14
 
 ### Features
