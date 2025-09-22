@@ -1,4 +1,5 @@
 from PIL import Image
+from PIL.Image import Image as PILImage
 from dataclasses import dataclass
 from functools import cached_property
 from io import BytesIO
@@ -31,12 +32,12 @@ class MapTile:
     mpq_reader: MPQFileReader
 
     @cached_property
-    def image(self) -> Image:
+    def image(self) -> PILImage:
         texture_data = self.mpq_reader.read_file(self.texture_path)
         if texture_data is None:
             return Image.new("RGBA", (256, 256), (0, 0, 0, 0))
 
-        image = Image.open(BytesIO(texture_data))
+        image: PILImage = Image.open(BytesIO(texture_data))
 
         if image.mode != "RGBA":
             image = image.convert("RGBA")
@@ -57,7 +58,7 @@ class Minimap:
 
     maps: dict[int, Map]
 
-    def render(self, map_id: int, position: Position, extent_pixels: int = 0) -> Image:
+    def render(self, map_id: int, position: Position, extent_pixels: int = 0) -> PILImage:
         """
         Render a minimap centered at the given position with the specified radius in pixels.
 

@@ -20,6 +20,9 @@ classifiers = [
 dependencies = ["psutil", "pymem; platform_system == 'Windows'"]
 dynamic = ["version"]
 
+[project.optional-dependencies]
+navigation = ["pillow"]
+
 [project.urls]
 "Homepage" = "https://github.com/mora9715/icecap"
 "Bug Tracker" = "https://github.com/mora9715/icecap/issues"

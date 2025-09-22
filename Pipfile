@@ -12,6 +12,7 @@ black = "*"
 ruff = "*"
 mypy = "*"
 types-psutil = "*"
+types-pillow = "*"
 mkdocstrings = {extras = ["python"], version = "*"}
 mkdocs = "*"
 mkdocs-material = "*"

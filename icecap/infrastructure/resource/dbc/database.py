@@ -1,4 +1,5 @@
-from typing import Type, IO
+from typing import Type, Union
+from io import BufferedReader, BytesIO
 
 import struct
 
@@ -12,7 +13,7 @@ class DBCFile:
 
     def __init__(
         self,
-        file_path: str | IO,
+        file_path: Union[str, BufferedReader, BytesIO],
         row_prototype: Type[DBCRowWithDefinitions],
     ):
         self.row_prototype = row_prototype
@@ -26,7 +27,7 @@ class DBCFile:
         )
 
         if isinstance(file_path, str):
-            self.file = open(file_path, "rb")
+            self.file: Union[BufferedReader, BytesIO] = open(file_path, "rb")
         else:
             self.file = file_path
 

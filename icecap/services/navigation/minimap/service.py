@@ -1,5 +1,6 @@
 from icecap.infrastructure.resource import MPQFileReader
-from icecap.infrastructure.resource import DBCFile, MapRowWithDefinitions
+from icecap.infrastructure.resource import DBCFile
+from icecap.infrastructure.resource.dbc.definitions import MapRowWithDefinitions
 import os
 from io import BytesIO
 from icecap.services.navigation.minimap.dto import MapTile, MapPosition, Map, Minimap
@@ -31,7 +32,7 @@ class MinimapService:
 
         file_contents = raw_file_contents.decode("utf-8")
 
-        result = {}
+        result: dict[str, dict[str, str]] = {}
         current_dir = None
 
         for line in file_contents.splitlines():
@@ -71,20 +72,21 @@ class MinimapService:
         Returns:
             Minimap: An object containing a collection of maps with their respective tiles.
         """
-        maps = {}
+        maps: dict[int, Map] = {}
         for record in self._map_database.get_records():
-            record: MapRowWithDefinitions
-            maps[record.map_id] = Map(map_id=record.map_id, tiles={})
+            map_id = getattr(record, "map_id")
+            directory = getattr(record, "directory")
+            maps[map_id] = Map(map_id=map_id, tiles={})
 
             for i in range(64):
                 for j in range(64):
-                    texture_path = self.build_minimap_texture_path(record.directory, i, j)
+                    texture_path = self.build_minimap_texture_path(directory, i, j)
 
                     if not texture_path:
                         continue
 
                     map_position = MapPosition(x=i, y=j)
-                    maps[record.map_id].tiles[map_position] = MapTile(
+                    maps[map_id].tiles[map_position] = MapTile(
                         position=map_position, texture_path=texture_path, mpq_reader=self.mpq_reader
                     )
 
