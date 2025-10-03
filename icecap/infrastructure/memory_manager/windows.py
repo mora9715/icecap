@@ -68,6 +68,13 @@ class WindowsMemoryManager:
         data = self.read_bytes(address, length)
         return dataclass.from_bytes(data)
 
+    def write_ulonglong(self, address: int, value: int) -> None:
+        """Write an unsigned 8-byte integer to the given address."""
+        try:
+            self._process.write_ulonglong(address, value)
+        except Exception as e:
+            raise IOError(f"Failed to write memory at address {address}: {e}")
+
     def __del__(self):
         """Clean up resources when the object is garbage collected."""
         if self._process is not None:

@@ -1,4 +1,4 @@
-.PHONY: lint lint-check format format-check serve-docs build-docs build
+.PHONY: lint lint-check format format-check serve-docs build-docs build build-agent-bindings
 
 lint:
 	pipenv run ruff check --fix icecap
@@ -21,3 +21,23 @@ build-docs:
 
 build:
 	pipenv run python -m build
+
+build-agent-bindings:
+	@echo "Building agent bindings from icecap-contracts..."
+	@echo "Cleaning existing bindings..."
+	@if exist "icecap\agent\v1\" del /q /s "icecap\agent\v1\*" >nul 2>&1
+	@echo "Clone or update contracts repo..."
+	@if exist "icecap-contracts" ( \
+		echo "Updating existing icecap-contracts repo..." && \
+		cd icecap-contracts && git pull origin main \
+	) else ( \
+		echo "Cloning icecap-contracts repo..." && \
+		git clone https://github.com/mora9715/icecap-contracts.git \
+	)
+	@echo "Compiling protobuf definitions..."
+	pipenv run python -m grpc_tools.protoc --python_out=./ --pyi_out=./ --proto_path=icecap-contracts icecap/agent/v1/commands.proto
+	pipenv run python -m grpc_tools.protoc --python_out=./ --pyi_out=./ --proto_path=icecap-contracts icecap/agent/v1/common.proto
+	pipenv run python -m grpc_tools.protoc --python_out=./ --pyi_out=./ --proto_path=icecap-contracts icecap/agent/v1/events.proto
+	@echo "Creating Python package..."
+	@if not exist "icecap\agent\v1\__init__.py" echo. > "icecap\agent\v1\__init__.py"
+	@echo "Agent bindings built successfully!"

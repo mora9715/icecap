@@ -17,7 +17,7 @@ classifiers = [
     "Operating System :: OS Independent",
     "Development Status :: 3 - Alpha",
 ]
-dependencies = ["psutil", "pymem; platform_system == 'Windows'"]
+dependencies = ["psutil", "pymem; platform_system == 'Windows'", "protobuf"]
 dynamic = ["version"]
 
 [project.optional-dependencies]
@@ -44,6 +44,8 @@ lint.select = ["E", "F"]
 # Allow autofix for all enabled rules (when `--fix`) is provided.
 lint.fixable = ["ALL"]
 
+# Exclude generated protobuf files
+extend-exclude = ["*_pb2.py", "*_pb2.pyi"]
 
 # Same as Black.
 line-length = 100
@@ -61,3 +63,8 @@ indent-style = "space"
 skip-magic-trailing-comma = false
 # Automatically detect the appropriate line ending.
 line-ending = "auto"
+
+[tool.mypy]
+exclude = [
+    ".*_pb2\\.pyi?$"
+]

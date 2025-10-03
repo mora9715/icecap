@@ -48,5 +48,8 @@ class MemoryManager(Protocol):
     def read_ctype_dataclass(self, address: int, dataclass: Type[CStructTypeVar]) -> CStructTypeVar:
         """Read a C-typed structure dataclass from the given address."""
 
+    def write_ulonglong(self, address: int, value: int) -> None:
+        """Write an unsigned 8-byte integer to the given address."""
+
 
 MemoryManagerGetter = Callable[[int], MemoryManager]

@@ -6,9 +6,9 @@ name = "pypi"
 [packages]
 psutil = "*"
 pymem = "*"
+protobuf = "*"
 
 [dev-packages]
-black = "*"
 ruff = "*"
 mypy = "*"
 types-psutil = "*"
@@ -19,6 +19,9 @@ mkdocs-material = "*"
 mkdocs-material-extensions = "*"
 setuptools = "*"
 build = "*"
+grpcio-tools = "*"
+types-protobuf = "*"
+black = {extras = ["jupyter"], version = "*"}
 
 [requires]
 python_version = "3.13"

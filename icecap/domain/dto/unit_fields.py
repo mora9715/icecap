@@ -29,3 +29,9 @@ class UnitFields:
 
     gender: Gender | None = None
     """The gender of the unit, if applicable."""
+
+    channel_spell: int | None = None
+    """The channel spell of the unit, if applicable."""
+
+    channel_object: int | None = None
+    """The channel object of the unit, if applicable."""

@@ -50,6 +50,8 @@ class PlayerRepository:
                 race=race,
                 player_class=PlayerClass(unit_fields.bytes_0_class),
                 gender=Gender(unit_fields.bytes_0_gender),
+                channel_object=unit_fields.channel_object,
+                channel_spell=unit_fields.channel_spell,
             ),
         )
         return player

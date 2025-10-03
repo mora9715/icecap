@@ -11,5 +11,8 @@ Welcome to the Icecap tutorials section. Here you'll find guides and examples to
 ### Navigation
 - [Working with Minimap](navigation/work_with_minimap.md) - Learn how to render World of Warcraft minimaps
 
+### Communication
+- [Interaction with Agent](communication/interact_with_agent.md) - Learn how to interact with the game process through the icecap agent
+
 ## Coming Soon
 More tutorials will be added in the future. Stay tuned!

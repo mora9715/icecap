@@ -78,6 +78,15 @@ class LinuxMemoryManager:
         data = self.read_bytes(address, length)
         return dataclass.from_bytes(data)
 
+    def write_ulonglong(self, address: int, value: int) -> None:
+        """Write an unsigned 8-byte integer to the given address."""
+        mem_file = self._get_mem_file()
+        try:
+            mem_file.seek(address)
+            mem_file.write(struct.pack("<Q", value))
+        except (IOError, OSError) as e:
+            raise IOError(f"Failed to write memory at address {address}: {e}")
+
     def __del__(self):
         """Clean up resources when the object is garbage collected."""
         if self._mem_file is not None:

@@ -19,4 +19,6 @@ This enables you to access game data and manipulate it as needed.
 The library allows you to interact with game entities as Python objects, making it easier to work with them in your code.
 - ## **Client assets management**
 Access MPQ archives programmatically to load and use assets such as textures, maps, and models.
+- ## **RPC**
+The library provides a simple asynchronous RPC system that allows you to call functions in the game's client process.
 </div>

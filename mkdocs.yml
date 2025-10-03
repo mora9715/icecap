@@ -72,9 +72,12 @@ nav:
           - Work with DBC files: tutorials/assets/work_with_dbc.md
       - Navigation:
           - Work with Minimap: tutorials/navigation/work_with_minimap.md
+      - Communication:
+          - Interact with the icecap agent: tutorials/communication/interact_with_agent.md
   - API Reference:
      - API Overview: api/index.md
      - Infrastructure:
+        - Communication: api/infrastructure/communication.md
         - Driver: api/infrastructure/driver.md
         - Memory Manager: api/infrastructure/memory_manager.md
         - Name Resolver: api/infrastructure/name_resolver.md
