@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.0] - 2025-10-13
+
+### Features
+
+- Add an RPC client to interact with the icecap-agent (injectable DLL)
+- Add UnitFields.channel_spell and UnitFields.channel_object properties. Can be used to see what the unit casts
+
 ## [0.6.0] - 2025-09-22
 
 ### Features
