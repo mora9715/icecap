@@ -17,7 +17,7 @@ test:
 	pipenv run pytest tests/ -v
 
 test-cov:
-	pipenv run pytest --cov --cov-branch --cov-report=xml
+	pipenv run pytest --cov=icecap --cov-branch --cov-report=xml
 
 test-unit:
 	pipenv run pytest tests/unit/ -v
