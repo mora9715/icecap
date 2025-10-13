@@ -22,6 +22,11 @@ build = "*"
 grpcio-tools = "*"
 types-protobuf = "*"
 black = {extras = ["jupyter"], version = "*"}
+pytest = "*"
+pytest-cov = "*"
+pytest-mock = "*"
+pytest-benchmark = "*"
+pytest-watch = "*"
 
 [requires]
 python_version = "3.13"

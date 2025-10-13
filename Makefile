@@ -1,17 +1,29 @@
-.PHONY: lint lint-check format format-check serve-docs build-docs build build-agent-bindings
+.PHONY: lint lint-check format format-check serve-docs build-docs build build-agent-bindings test test-cov test-unit test-integration test-watch
 
 lint:
-	pipenv run ruff check --fix icecap
+	pipenv run ruff check --fix icecap tests
 
 lint-check:
-	pipenv run ruff check icecap
+	pipenv run ruff check icecap tests
 	pipenv run mypy icecap
 
 format:
-	pipenv run ruff format icecap
+	pipenv run ruff format icecap tests
 
 format-check:
-	pipenv run ruff format --check icecap
+	pipenv run ruff format --check icecap tests
+
+test:
+	pipenv run pytest tests/ -v
+
+test-cov:
+	pipenv run pytest tests/ --cov=icecap --cov-report=xml --cov-report=html --cov-report=term
+
+test-unit:
+	pipenv run pytest tests/unit/ -v
+
+test-integration:
+	pipenv run pytest tests/integration/ -v
 
 serve-docs:
 	pipenv run mkdocs serve
