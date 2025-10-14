@@ -1,11 +1,19 @@
 """Global pytest configuration and fixtures for IceCap tests."""
 
+import os
 import pytest
 from unittest.mock import Mock, MagicMock
 
 from icecap.domain.models import Entity
 from icecap.domain.enums import EntityType
 from icecap.domain.dto import Position
+
+
+@pytest.fixture(scope="session")
+def gameobject_template_data_path() -> str:
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+
+    return os.path.join(dir_path, "data", "gameobject_template.csv")
 
 
 @pytest.fixture

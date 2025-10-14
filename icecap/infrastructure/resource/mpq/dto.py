@@ -10,7 +10,7 @@ class HeaderExtension:
 
 @dataclass(slots=True)
 class Header:
-    magic: str
+    magic: bytes
     header_size: int
     archive_size: int
     format_version: int

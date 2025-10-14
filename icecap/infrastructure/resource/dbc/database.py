@@ -21,15 +21,15 @@ class DBCFile:
         self._header: DBCHeader | None = None
         self._records: list[DBCRowWithDefinitions] | None = None
 
-        self.column_definitions = (
-            row_prototype.get_definitions()
-            or DBCColumnDefinition.generate_default_definitions(self.get_header().field_count)
-        )
-
         if isinstance(file_path, str):
             self.file: Union[BufferedReader, BytesIO] = open(file_path, "rb")
         else:
             self.file = file_path
+
+        self.column_definitions = (
+            row_prototype.get_definitions()
+            or DBCColumnDefinition.generate_default_definitions(self.get_header().field_count)
+        )
 
     @classmethod
     def from_file(cls, file_path: str, row_prototype: Type[DBCRowWithDefinitions]):

@@ -12,6 +12,9 @@ class DBCColumnDefinition:
 
     @classmethod
     def generate_default_definitions(cls, field_count: int) -> list["DBCColumnDefinition"]:
+        if field_count == 0:
+            return []
+
         columns = [DBCColumnDefinition(DBCFieldType.UINT, is_primary_key=True)]
 
         for i in range(1, field_count):

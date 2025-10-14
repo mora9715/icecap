@@ -13,6 +13,9 @@ class MockMemoryManager:
 
     def read_uint(self, address: int) -> int:
         """Read an unsigned int from memory."""
+        # Simulate access violation for very low addresses
+        if address < 0x1000:
+            raise OSError(f"Access violation at address {hex(address)}")
         data = self.memory.get(address, b"\x00\x00\x00\x00")
         return int.from_bytes(data[:4], byteorder="little", signed=False)
 
@@ -30,7 +33,49 @@ class MockMemoryManager:
 
     def read_bytes(self, address: int, size: int) -> bytes:
         """Read bytes from memory."""
-        return self.memory.get(address, b"\x00" * size)[:size]
+        # Build a contiguous buffer by checking each byte in the range
+        result = bytearray(size)
+        for i in range(size):
+            byte_addr = address + i
+            # Check if we have data at this address
+            if byte_addr in self.memory:
+                data = self.memory[byte_addr]
+                # Handle case where data is stored as a multi-byte value
+                if isinstance(data, bytes) and len(data) > 0:
+                    result[i] = data[0]
+                else:
+                    result[i] = 0
+            else:
+                # Check if this address is within a larger stored block
+                found = False
+                for stored_addr, stored_data in self.memory.items():
+                    if isinstance(
+                        stored_data, bytes
+                    ) and stored_addr <= byte_addr < stored_addr + len(stored_data):
+                        result[i] = stored_data[byte_addr - stored_addr]
+                        found = True
+                        break
+                if not found:
+                    result[i] = 0
+        return bytes(result)
+
+    def read_string(self, address: int, length: int = 256) -> str:
+        """Read a null-terminated string from memory."""
+        data = self.memory.get(address, b"\x00" * length)
+        # Find null terminator
+        null_index = data.find(b"\x00")
+        if null_index != -1:
+            data = data[:null_index]
+        return data.decode("utf-8", errors="ignore")
+
+    def read_ctype_dataclass(self, address: int, dataclass_type):
+        """Read a ctypes dataclass from memory."""
+        # Get the byte size of the structure
+        length = dataclass_type.byte_size()
+        # Read the bytes from memory
+        data = self.read_bytes(address, length)
+        # Use the dataclass's from_bytes method to deserialize
+        return dataclass_type.from_bytes(data)
 
 
 class MemoryBuilder:

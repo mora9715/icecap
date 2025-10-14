@@ -27,6 +27,7 @@ pytest-cov = "*"
 pytest-mock = "*"
 pytest-benchmark = "*"
 pytest-watch = "*"
+pillow = "*"
 
 [requires]
 python_version = "3.13"
