@@ -1,6 +1,7 @@
 # IceCap
 
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/mora9715/icecap/quality.yml)
+[![codecov](https://codecov.io/github/mora9715/icecap/graph/badge.svg?token=LGW3RGRCAL)](https://codecov.io/github/mora9715/icecap)
 [![pypi version](https://img.shields.io/pypi/v/icecap.svg)](https://pypi.org/project/icecap/)
 [![documentation](https://img.shields.io/badge/docs-icecap-708FCC.svg?style=flat)](https://icecap.prodan.cloud/)
 
