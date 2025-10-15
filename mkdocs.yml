@@ -74,6 +74,7 @@ nav:
           - Work with Minimap: tutorials/navigation/work_with_minimap.md
       - Communication:
           - Interact with the icecap agent: tutorials/communication/interact_with_agent.md
+      - Logging: tutorials/logging.md
   - API Reference:
      - API Overview: api/index.md
      - Infrastructure:

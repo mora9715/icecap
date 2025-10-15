@@ -4,6 +4,9 @@ Welcome to the Icecap tutorials section. Here you'll find guides and examples to
 
 ## Available Tutorials
 
+### Logging
+- [Configure library logging](logging.md) - Learn how to configure library logging
+
 ### Working with Game Resources
 - [Working with MPQ Archives](assets/work_with_mpq.md) - Learn how to work with MPQ files (WoW data files)
 - [Working with DBC Files](assets/work_with_dbc.md) - Learn how to work with DBC database files (WoW game data)
@@ -13,6 +16,7 @@ Welcome to the Icecap tutorials section. Here you'll find guides and examples to
 
 ### Communication
 - [Interaction with Agent](communication/interact_with_agent.md) - Learn how to interact with the game process through the icecap agent
+
 
 ## Coming Soon
 More tutorials will be added in the future. Stay tuned!
