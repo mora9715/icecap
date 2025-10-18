@@ -1,8 +1,11 @@
 """Factory for creating name resolver instances."""
 
+import logging
 from icecap.infrastructure.memory_manager import MemoryManager
 from .resolver import ConcreteNameResolver
 from .interface import NameResolver
+
+logger = logging.getLogger(__name__)
 
 
 def get_name_resolver(
@@ -17,4 +20,5 @@ def get_name_resolver(
     Returns:
         A NameResolver instance.
     """
+    logger.debug("Creating NameResolver instance")
     return ConcreteNameResolver(memory_manager, data_mapping_filename)

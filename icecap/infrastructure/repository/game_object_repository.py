@@ -1,3 +1,4 @@
+import logging
 from typing import Generator
 from icecap.infrastructure.driver import GameDriver
 from icecap.domain.models import GameObject, Entity
@@ -5,6 +6,8 @@ from icecap.domain.enums import EntityType
 from icecap.domain.dto import Position, GameObjectFields
 from icecap.infrastructure.driver import ObjectManager
 from icecap.infrastructure.name_resolver import NameResolver
+
+logger = logging.getLogger(__name__)
 
 
 class GameObjectRepository:
@@ -15,6 +18,7 @@ class GameObjectRepository:
 
     def __init__(self, driver: GameDriver):
         self.driver = driver
+        logger.debug("GameObjectRepository initialized")
 
     def get_game_object_from_entity(
         self,
@@ -29,6 +33,7 @@ class GameObjectRepository:
 
         You can bring your own name resolver and object manager.
         """
+        logger.debug(f"Converting entity {hex(entity.guid)} to GameObject")
         object_manager = object_manager or self.driver.object_manager
         name_resolver = name_resolver or self.driver.name_resolver
 
@@ -49,6 +54,7 @@ class GameObjectRepository:
                 state=game_object_fields.bytes1_state,
             ),
         )
+        logger.debug(f"Created GameObject: {name} (GUID: {hex(entity.guid)})")
         return game_object
 
     def yield_game_objects(self) -> Generator[GameObject, None, None]:
@@ -58,14 +64,19 @@ class GameObjectRepository:
         only those that are of type GAME_OBJECT. Each entity is extended to a
         GameObject object before being yielded.
         """
+        logger.debug("Starting game object enumeration")
         object_manager = self.driver.object_manager
         name_resolver = self.driver.name_resolver
 
+        count = 0
         for entity in object_manager.yield_objects():
             if entity.entity_type != EntityType.GAME_OBJECT:
                 continue
 
             yield self.get_game_object_from_entity(entity, object_manager, name_resolver)
+            count += 1
+
+        logger.debug(f"Game object enumeration completed, yielded {count} game objects")
 
     def refresh_game_object(self, game_object: GameObject) -> GameObject:
         """Refresh the game object data with the latest information from the game.
@@ -74,6 +85,7 @@ class GameObjectRepository:
         returns a new GameObject instance with the updated data. The original GameObject
         instance is not modified.
         """
+        logger.debug(f"Refreshing game object: {game_object.name} (GUID: {hex(game_object.guid)})")
         object_manager = self.driver.object_manager
 
         position = object_manager.get_entity_position(game_object)

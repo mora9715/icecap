@@ -1,3 +1,4 @@
+import logging
 from typing import Generator
 from icecap.infrastructure.driver import GameDriver
 from icecap.domain.models import Player, Entity
@@ -5,6 +6,8 @@ from icecap.domain.enums import EntityType, Faction, Race, PlayerClass, Gender
 from icecap.domain.dto import Position, UnitFields
 from icecap.infrastructure.driver import ObjectManager
 from icecap.infrastructure.name_resolver import NameResolver
+
+logger = logging.getLogger(__name__)
 
 
 class PlayerRepository:
@@ -15,6 +18,7 @@ class PlayerRepository:
 
     def __init__(self, driver: GameDriver):
         self.driver = driver
+        logger.debug("PlayerRepository initialized")
 
     def get_player_from_entity(
         self,
@@ -27,6 +31,7 @@ class PlayerRepository:
         This method takes an Entity object and extracts all the necessary information
         to create a Player object.
         """
+        logger.debug(f"Converting entity {hex(entity.guid)} to Player")
         object_manager = object_manager or self.driver.object_manager
         name_resolver = name_resolver or self.driver.name_resolver
 
@@ -54,6 +59,9 @@ class PlayerRepository:
                 channel_spell=unit_fields.channel_spell,
             ),
         )
+        logger.debug(
+            f"Created Player: {name} (GUID: {hex(entity.guid)}, Level: {unit_fields.level})"
+        )
         return player
 
     def yield_players(self) -> Generator[Player, None, None]:
@@ -63,14 +71,19 @@ class PlayerRepository:
         only those that are of type PLAYER. Each entity is extended to a Player object
         before being yielded.
         """
+        logger.debug("Starting player enumeration")
         object_manager = self.driver.object_manager
         name_resolver = self.driver.name_resolver
 
+        count = 0
         for entity in object_manager.yield_objects():
             if entity.entity_type != EntityType.PLAYER:
                 continue
 
             yield self.get_player_from_entity(entity, object_manager, name_resolver)
+            count += 1
+
+        logger.debug(f"Player enumeration completed, yielded {count} players")
 
     def refresh_player(self, player: Player) -> Player:
         """Refresh the player data with the latest information from the game.
@@ -79,6 +92,7 @@ class PlayerRepository:
         returns a new Player instance with the updated data. The original Player
         instance is not modified.
         """
+        logger.debug(f"Refreshing player: {player.name} (GUID: {hex(player.guid)})")
         object_manager = self.driver.object_manager
 
         position = object_manager.get_entity_position(player)
@@ -107,13 +121,20 @@ class PlayerRepository:
         It uses the object manager to get the local player's
         GUID and then searches for the corresponding entity.
         """
+        logger.debug("Retrieving local player")
         object_manager = self.driver.object_manager
         name_resolver = self.driver.name_resolver
 
         local_player_guid = object_manager.get_local_player_guid()
+        logger.debug(f"Local player GUID: {hex(local_player_guid)}")
 
         for entity in object_manager.yield_objects():
             if entity.guid == local_player_guid:
-                return self.get_player_from_entity(entity, object_manager, name_resolver)
+                player = self.get_player_from_entity(entity, object_manager, name_resolver)
+                logger.info(
+                    f"Retrieved local player: {player.name} (Level {player.unit_fields.level})"
+                )
+                return player
 
+        logger.error("Local player not found in the object manager")
         raise ValueError("Local player not found in the object manager.")

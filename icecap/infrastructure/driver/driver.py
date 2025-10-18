@@ -1,5 +1,6 @@
 """The game driver."""
 
+import logging
 from icecap.infrastructure.memory_manager import MemoryManager, MemoryManagerGetter
 from icecap.infrastructure.process import GameProcessManager
 from .object_manager import ObjectManager
@@ -10,6 +11,8 @@ from .offsets import (
     OBJECT_MANAGER_OFFSET,
     LOCAL_PLAYER_GUID_STATIC_OFFSET,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class GameDriver:
@@ -47,6 +50,7 @@ class GameDriver:
         The attribute may return different objects depending on the state of the driver.
         """
         if not self._name_resolver:
+            logger.info("Name resolver initialized")
             self._name_resolver = get_name_resolver(self.memory_manager)
             return self._name_resolver
 
@@ -63,6 +67,7 @@ class GameDriver:
             return self._memory_manager
 
         if self.game_process_manager.pid_changed_since_last_call():
+            logger.info("Game process PID changed, reinitializing memory manager")
             self._memory_manager = self._get_memory_manager()
 
             # Existing name resolver and object manager
@@ -81,11 +86,15 @@ class GameDriver:
         if not self._object_manager:
             self._object_manager = self._get_object_manager()
             self._last_known_object_manager_address = self._object_manager.address
+            logger.debug(
+                f"Object manager initialized at address: {hex(self._object_manager.address)}"
+            )
             return self._object_manager
 
         if self._last_known_object_manager_address != self._get_object_manager_address(
             self.get_client_connection_address()
         ):
+            logger.info("Object manager address changed, reinitializing object manager")
             self._object_manager = self._get_object_manager()
             self._last_known_object_manager_address = self._object_manager.address
 
@@ -95,6 +104,7 @@ class GameDriver:
         process_id = self.game_process_manager.get_process_id()
 
         if not process_id:
+            logger.error("Cannot create memory manager: game process is not running")
             raise RuntimeError("Game process is not running.")
         return self.memory_manager_getter(process_id)
 

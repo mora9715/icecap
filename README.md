@@ -15,8 +15,8 @@ The library is specifically designed for **WoW 3.3.5a (build 1340)** and will no
 
 - **Memory Management**: Read and write to the game's memory to access and manipulate game data
 - **Entities as Objects**: Interact with game entities (players, units, game objects) as Python objects
-- **Game assets management**: Access MPQ archives programmatically 
-- **Less Boilerplate**: Designed to minimize boilerplate code
+- **Game assets management**: Work directly with game files - MPQ and DBC formats are supported
+- **Game process RPC**: Provides batteries to communicate directly with game process through an injectable DLL
 
 ## Documentation
 

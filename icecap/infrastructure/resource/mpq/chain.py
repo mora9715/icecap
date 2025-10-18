@@ -1,6 +1,9 @@
+import logging
 import re
 import os.path
 from .archive import MPQArchive
+
+logger = logging.getLogger(__name__)
 
 
 class MPQArchiveChain:
@@ -36,8 +39,10 @@ class MPQArchiveChain:
     @classmethod
     def load_archives(cls, game_data_path: str) -> "MPQArchiveChain":
         """Find all MPQ archives in the game_data_path and add them to an MPQArchiveChain."""
+        logger.info(f"Loading MPQ archives from: {game_data_path}")
         chain = MPQArchiveChain()
 
+        archive_count = 0
         for root, _, files in os.walk(game_data_path):
             for file in files:
                 if file.lower().endswith(MPQArchive.ARCHIVE_EXTENSION):
@@ -46,9 +51,12 @@ class MPQArchiveChain:
                         archive = MPQArchive(archive_path)
 
                         chain.add_archive(archive)
+                        archive_count += 1
                     except Exception as e:
+                        logger.error(f"Failed to load MPQ archive {file}: {e}")
                         raise ValueError(f"Failed to load MPQ archive {file}: {e}") from e
 
+        logger.info(f"Loaded {archive_count} MPQ archives from: {game_data_path}")
         return chain
 
     def add_archive(self, archive: MPQArchive):
@@ -64,8 +72,10 @@ class MPQArchiveChain:
 
             if archive not in self._prioritized_archives[number]:
                 self._prioritized_archives[number].append(archive)
+                logger.debug(f"Added archive '{archive_name}' with priority {number}")
             return
 
+        logger.error(f"Could not find a suitable priority for archive '{archive_name}'")
         raise ValueError(f"Could not find a suitable priority for archive '{archive_name}'")
 
     def read_file(self, filename: str) -> bytes | None:
@@ -73,9 +83,13 @@ class MPQArchiveChain:
 
         The file is searched in the archives in the priority order.
         """
+        logger.debug(f"Reading file '{filename}' from MPQ chain")
         for priority in sorted(self._prioritized_archives.keys()):
             for archive in self._prioritized_archives[priority]:
                 if archive.file_exists(filename):
-                    return archive.read_file(filename)
+                    result = archive.read_file(filename)
+                    logger.debug(f"File '{filename}' found in archive: {archive.file_path}")
+                    return result
 
+        logger.warning(f"File '{filename}' not found in any archive in the chain")
         return None

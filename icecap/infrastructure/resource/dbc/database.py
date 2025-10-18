@@ -1,3 +1,4 @@
+import logging
 from typing import Type, Union
 from io import BufferedReader, BytesIO
 
@@ -5,6 +6,8 @@ import struct
 
 from .dto import DBCColumnDefinition, DBCHeader, DBCRowWithDefinitions
 from .enums import DBCFieldType, DBCLocale
+
+logger = logging.getLogger(__name__)
 
 
 class DBCFile:
@@ -22,9 +25,13 @@ class DBCFile:
         self._records: list[DBCRowWithDefinitions] | None = None
 
         if isinstance(file_path, str):
+            logger.debug(f"Opening DBC file: {file_path}")
             self.file: Union[BufferedReader, BytesIO] = open(file_path, "rb")
+            self.file_path = file_path
         else:
+            logger.debug("Opening DBC file from buffer")
             self.file = file_path
+            self.file_path = "<buffer>"
 
         self.column_definitions = (
             row_prototype.get_definitions()
@@ -52,14 +59,20 @@ class DBCFile:
         )
 
         if self._header.signature != self.HEADER_SIGNATURE:
+            logger.error(f"Invalid DBC file signature in: {self.file_path}")
             raise ValueError("Invalid DBC file signature.")
 
+        logger.debug(
+            f"Loaded DBC header: {self._header.record_count} "
+            f"records, {self._header.field_count} fields"
+        )
         return self._header
 
     def get_records(self) -> list[DBCRowWithDefinitions]:
         if self._records:
             return self._records
 
+        logger.debug(f"Loading DBC records from: {self.file_path}")
         records = []
 
         header = self.get_header()
@@ -119,6 +132,7 @@ class DBCFile:
             records.append(self.row_prototype(*column_values))
 
         self._records = records
+        logger.info(f"Loaded {len(records)} records from DBC file: {self.file_path}")
         return self._records
 
     def _get_string(self, string_block: bytes, offset: int) -> str:
@@ -134,6 +148,7 @@ class DBCFile:
 
     def __del__(self):
         try:
+            logger.debug(f"Closing DBC file: {self.file_path}")
             self.file.close()
         except Exception:
             pass

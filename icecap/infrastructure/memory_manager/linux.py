@@ -1,6 +1,9 @@
+import logging
 import struct
 from typing import Type
 from .interface import CStructTypeVar
+
+logger = logging.getLogger(__name__)
 
 
 class LinuxMemoryManager:
@@ -11,13 +14,16 @@ class LinuxMemoryManager:
         self._mem_path = f"/proc/{pid}/mem"
         # We'll open the file lazily when needed
         self._mem_file = None
+        logger.info(f"Initializing process memory manager with PID: {pid}")
 
     def _get_mem_file(self):
         """Get or create the memory file handle."""
         if self._mem_file is None:
             try:
+                logger.debug(f"Opening memory file: {self._mem_path}")
                 self._mem_file = open(self._mem_path, "rb")
             except (IOError, PermissionError) as e:
+                logger.error(f"Failed to open process memory at {self._mem_path}: {e}")
                 raise IOError(f"Failed to open process memory: {e}")
         return self._mem_file
 
@@ -31,11 +37,15 @@ class LinuxMemoryManager:
             mem_file.seek(address)
             data = mem_file.read(size)
             if len(data) < size:
+                logger.error(
+                    f"Could only read {len(data)} bytes out of {size} at address {hex(address)}"
+                )
                 raise IOError(
                     f"Could only read {len(data)} bytes out of {size} at address {address}"
                 )
             return data
         except (IOError, OSError) as e:
+            logger.error(f"Failed to read memory at address {hex(address)}: {e}")
             raise IOError(f"Failed to read memory at address {address}: {e}")
 
     def read_short(self, address: int) -> int:
@@ -84,13 +94,16 @@ class LinuxMemoryManager:
         try:
             mem_file.seek(address)
             mem_file.write(struct.pack("<Q", value))
+            logger.debug(f"Wrote ulonglong value {value} to address {hex(address)}")
         except (IOError, OSError) as e:
+            logger.error(f"Failed to write memory at address {hex(address)}: {e}")
             raise IOError(f"Failed to write memory at address {address}: {e}")
 
     def __del__(self):
         """Clean up resources when the object is garbage collected."""
         if self._mem_file is not None:
             try:
+                logger.debug(f"Closing memory file for PID {self.pid}")
                 self._mem_file.close()
             except Exception:
                 pass  # Ignore errors during cleanup

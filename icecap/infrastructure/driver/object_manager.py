@@ -1,5 +1,6 @@
 """The object manager."""
 
+import logging
 from typing import Generator
 from icecap.infrastructure.memory_manager import MemoryManager
 from icecap.domain.models import Entity
@@ -21,6 +22,8 @@ from .offsets import (
     OBJECT_FIELDS_OFFSET,
     MAP_ID_OFFSET,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class ObjectManager:
@@ -59,13 +62,17 @@ class ObjectManager:
         """
         checked_objects = 0
         current_object_address = self.memory_manager.read_uint(self.address + FIRST_OBJECT_OFFSET)
+        logger.debug(f"Starting object enumeration from address: {hex(current_object_address)}")
 
         while checked_objects < self.max_objects:
             try:
                 object_type = EntityType(
                     self.memory_manager.read_uint(current_object_address + OBJECT_TYPE_OFFSET)
                 )
-            except Exception:
+            except Exception as e:
+                logger.warning(
+                    f"Failed to read object type at address {hex(current_object_address)}: {e}"
+                )
                 break
 
             object_guid = self.memory_manager.read_ulonglong(
@@ -82,6 +89,8 @@ class ObjectManager:
             current_object_address = self.memory_manager.read_uint(
                 current_object_address + NEXT_OBJECT_OFFSET
             )
+
+        logger.debug(f"Object enumeration completed, yielded {checked_objects} objects")
 
     def get_entity_position(self, entity: Entity) -> ObjectPosition:
         """Retrieve the position of an entity in the game world.

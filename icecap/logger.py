@@ -28,25 +28,8 @@ def configure_logging(
 
     logger.handlers.clear()
 
-    # Add new handlers with formatter
     formatter = logging.Formatter(log_format)
+
     for handler in handlers:
         handler.setFormatter(formatter)
         logger.addHandler(handler)
-
-    # Also configure component loggers
-    component_loggers = [
-        "memory",
-        "driver",
-        "communication",
-        "process",
-        "resource",
-        "ai",
-        "services",
-    ]
-    for component in component_loggers:
-        component_logger = logging.getLogger(component)
-        component_logger.setLevel(level)
-        component_logger.handlers.clear()
-        for handler in handlers:
-            component_logger.addHandler(handler)

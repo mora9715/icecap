@@ -1,8 +1,16 @@
+import logging
 import struct
 import zlib
 import bz2
 from io import BytesIO
-from .dto import Header, HeaderExtension, HashTable, BlockTable, HashTableEntry, BlockTableEntry
+from .dto import (
+    Header,
+    HeaderExtension,
+    HashTable,
+    BlockTable,
+    HashTableEntry,
+    BlockTableEntry,
+)
 
 from .crypt import Crypt
 from .enums import HashType
@@ -14,6 +22,8 @@ from .flags import (
     MPQ_FILE_SECTOR_CRC,
     MPQ_FILE_COMPRESS,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class MPQArchive:
@@ -30,6 +40,7 @@ class MPQArchive:
     def __init__(self, path: str):
         self.file_path = path
 
+        logger.debug(f"Opening MPQ archive: {path}")
         self.file = open(path, "rb")
         self.crypt = Crypt()
 
@@ -49,13 +60,16 @@ class MPQArchive:
         if self._file_names:
             return self._file_names
 
+        logger.debug(f"Loading file list from archive: {self.file_path}")
         listfile_data = self.read_file("(listfile)")
 
         if listfile_data is None:
+            logger.warning(f"No listfile found in archive: {self.file_path}")
             self._file_names = []
             return self._file_names
 
         self._file_names = listfile_data.decode().splitlines()
+        logger.info(f"Loaded {len(self._file_names)} files from archive: {self.file_path}")
 
         return self._file_names
 
@@ -72,8 +86,10 @@ class MPQArchive:
         self.file.seek(0)
 
         if magic == b"MPQ\x1b":
+            logger.error(f"MPQ shunts are not supported in archive: {self.file_path}")
             raise ValueError("MPQ shunts are not supported.")
         elif magic != b"MPQ\x1a":
+            logger.error(f"Invalid MPQ header in archive: {self.file_path}")
             raise ValueError("Invalid MPQ header.")
 
         data = self.file.read(32)
@@ -82,8 +98,16 @@ class MPQArchive:
             header_extension_data = self.file.read(12)
             header.extension = HeaderExtension(*struct.unpack("<q2h", header_extension_data))
         if header.format_version > 1:
+            logger.error(
+                f"Unsupported MPQ format version {header.format_version} in"
+                f" archive: {self.file_path}"
+            )
             raise ValueError("Unsupported MPQ format version.")
 
+        logger.debug(
+            f"Loaded MPQ header for archive: {self.file_path} (format version:"
+            f" {header.format_version})"
+        )
         self._header = header
         return self._header
 
@@ -200,9 +224,11 @@ class MPQArchive:
         """
         Read a file from the MPQ archive.
         """
+        logger.debug(f"Reading file '{filename}' from archive: {self.file_path}")
         # Get file metadata
         hash_entry = self.get_hash_table_entry(filename)
         if hash_entry is None:
+            logger.debug(f"File '{filename}' not found in archive: {self.file_path}")
             return None
 
         header = self.get_header()
@@ -211,9 +237,11 @@ class MPQArchive:
 
         # Check if the file exists and has content
         if not (block_entry.flags & MPQ_FILE_EXISTS):
+            logger.debug(f"File '{filename}' does not exist in archive: {self.file_path}")
             return None
 
         if block_entry.compressed_size == 0:
+            logger.debug(f"File '{filename}' has no content in archive: {self.file_path}")
             return None
 
         # Read file resource
@@ -222,16 +250,24 @@ class MPQArchive:
 
         # Check for encryption
         if block_entry.flags & MPQ_FILE_ENCRYPTED:
+            logger.error(f"File '{filename}' is encrypted - encryption not supported")
             raise NotImplementedError("Encryption is not supported yet.")
 
         # Process file based on its structure
         if block_entry.flags & MPQ_FILE_SINGLE_UNIT:
-            return self._process_single_unit_file(file_data, block_entry)
+            result = self._process_single_unit_file(file_data, block_entry)
         else:
-            return self._process_multi_sector_file(file_data, block_entry, header.block_size)
+            result = self._process_multi_sector_file(file_data, block_entry, header.block_size)
+
+        logger.debug(
+            f"Successfully read file '{filename}' ({len(result)} bytes)"
+            f" from archive: {self.file_path}"
+        )
+        return result
 
     def __del__(self):
         try:
+            logger.debug(f"Closing MPQ archive: {self.file_path}")
             self.file.close()
         except Exception:
             pass

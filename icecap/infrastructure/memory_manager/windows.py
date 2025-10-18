@@ -1,8 +1,13 @@
+import logging
+
 import struct
 from typing import Type
 import pymem  # type: ignore
 
 from .interface import CStructTypeVar
+
+
+logger = logging.getLogger(__name__)
 
 
 class WindowsMemoryManager:
@@ -15,10 +20,13 @@ class WindowsMemoryManager:
     def _initialize_process(self):
         """Initialize the process handle using pymem."""
         try:
+            logger.info(f"Initializing process memory manager with PID: {self.pid}")
             self._process = pymem.Pymem(self.pid)
         except pymem.exception.ProcessNotFound:
+            logger.error(f"Process with PID {self.pid} not found")
             raise IOError(f"Process with PID {self.pid} not found")
         except Exception as e:
+            logger.error(f"Failed to open process memory: {e}")
             raise IOError(f"Failed to open process memory: {e}")
 
     def read_bytes(self, address: int, size: int) -> bytes:
@@ -26,11 +34,15 @@ class WindowsMemoryManager:
         try:
             data = self._process.read_bytes(address, size)
             if len(data) < size:
+                logger.error(
+                    f"Could only read {len(data)} bytes out of {size} at address {hex(address)}"
+                )
                 raise IOError(
                     f"Could only read {len(data)} bytes out of {size} at address {address}"
                 )
             return data
         except Exception as e:
+            logger.error(f"Failed to read memory at address {hex(address)}: {e}")
             raise IOError(f"Failed to read memory at address {address}: {e}")
 
     def read_short(self, address: int) -> int:
@@ -72,13 +84,16 @@ class WindowsMemoryManager:
         """Write an unsigned 8-byte integer to the given address."""
         try:
             self._process.write_ulonglong(address, value)
+            logger.debug(f"Wrote ulonglong value {value} to address {hex(address)}")
         except Exception as e:
+            logger.error(f"Failed to write memory at address {hex(address)}: {e}")
             raise IOError(f"Failed to write memory at address {address}: {e}")
 
     def __del__(self):
         """Clean up resources when the object is garbage collected."""
         if self._process is not None:
             try:
+                logger.debug(f"Closing process handle for PID {self.pid}")
                 self._process.close_process()
             except Exception:
                 pass  # Ignore errors during cleanup

@@ -1,3 +1,4 @@
+import logging
 from typing import Generator
 from icecap.infrastructure.driver import GameDriver
 from icecap.domain.models import Unit, Entity
@@ -5,6 +6,8 @@ from icecap.domain.enums import EntityType, Faction, Race, PlayerClass, Gender
 from icecap.domain.dto import Position, UnitFields
 from icecap.infrastructure.driver import ObjectManager
 from icecap.infrastructure.name_resolver import NameResolver
+
+logger = logging.getLogger(__name__)
 
 
 class UnitRepository:
@@ -15,6 +18,7 @@ class UnitRepository:
 
     def __init__(self, driver: GameDriver):
         self.driver = driver
+        logger.debug("UnitRepository initialized")
 
     def get_unit_from_entity(
         self,
@@ -27,6 +31,7 @@ class UnitRepository:
         This method takes an Entity object and extracts all the necessary information
         and creates a Unit object from it.
         """
+        logger.debug(f"Converting entity {hex(entity.guid)} to Unit")
         object_manager = object_manager or self.driver.object_manager
         name_resolver = name_resolver or self.driver.name_resolver
 
@@ -52,6 +57,7 @@ class UnitRepository:
                 gender=Gender(unit_fields.bytes_0_gender),
             ),
         )
+        logger.debug(f"Created Unit: {name} (GUID: {hex(entity.guid)}, Level: {unit_fields.level})")
         return unit
 
     def yield_units(self) -> Generator[Unit, None, None]:
@@ -61,14 +67,19 @@ class UnitRepository:
         only those that are of type UNIT. Each entity is extended to a Unit object
         before being yielded.
         """
+        logger.debug("Starting unit enumeration")
         object_manager = self.driver.object_manager
         name_resolver = self.driver.name_resolver
 
+        count = 0
         for entity in object_manager.yield_objects():
             if entity.entity_type != EntityType.UNIT:
                 continue
 
             yield self.get_unit_from_entity(entity, object_manager, name_resolver)
+            count += 1
+
+        logger.debug(f"Unit enumeration completed, yielded {count} units")
 
     def refresh_unit(self, unit: Unit) -> Unit:
         """Refresh the unit data with the latest information from the game.
@@ -77,6 +88,7 @@ class UnitRepository:
         returns a new Unit instance with the updated data. The original Unit
         instance is not modified.
         """
+        logger.debug(f"Refreshing unit: {unit.name} (GUID: {hex(unit.guid)})")
         object_manager = self.driver.object_manager
 
         position = object_manager.get_entity_position(unit)
